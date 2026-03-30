@@ -38,6 +38,7 @@ go Transfer(B, A, 10)
 
 What happens to sync.Mutex performance under high contention (e.g. 3400+ goroutines)?
 When should you use sync/atomic instead of sync.Mutex?
+How does RWMutex works?
 Dlaczego RLock lub RWLock działają wolnej od zwykłego Locka?
 
 # Complexity & Maintainability
@@ -61,3 +62,11 @@ a szklanka klienta to stan, który gorutyna/nasz pracownik zmienia napełnia(pis
 Kran z piwem ma zamek(mutex) - to znaczy, że tylko jeden pracownik może napełnić kufel i zwrócić go klientowi.
 Naturalne więc jest jak będzie więcej pracowników, a tylko 3 krany, to Ci pracownicy będą czekać i rywalizować, o dostęp do kranu.
 A co jeśli klient też będzie gorutyną? Nikt nie będzie
+
+Metafora do RWMutex:
+Imagine that a RWMutex (Read-Write Mutex) is a door to a reading room containing a single, very important data book.
+A standard Mutex is "selfish" – it only lets one person in at a time, regardless of whether they only want to read or write. 
+An RWMutex is more intelligent and distinguishes between Readers and Writers.
+- Multiple Readers at Once: If no one is writing, any number of people can enter and read simultaneously (RLock). This speeds up the program tremendously if you have a lot of readings.
+- Only One Writer: If someone wants to write (Lock), they must be completely alone in the room. No one else can read or write at this time.
+- Writer Has Priority (Queue): If someone is waiting to start writing, new readers are no longer allowed in until the writer has finished. This prevents a situation where a crowd of readers never lets the writer speak (known as writer starvation).
