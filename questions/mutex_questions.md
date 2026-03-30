@@ -70,3 +70,52 @@ An RWMutex is more intelligent and distinguishes between Readers and Writers.
 - Multiple Readers at Once: If no one is writing, any number of people can enter and read simultaneously (RLock). This speeds up the program tremendously if you have a lot of readings.
 - Only One Writer: If someone wants to write (Lock), they must be completely alone in the room. No one else can read or write at this time.
 - Writer Has Priority (Queue): If someone is waiting to start writing, new readers are no longer allowed in until the writer has finished. This prevents a situation where a crowd of readers never lets the writer speak (known as writer starvation).
+
+## Example
+
+```go
+package main
+
+import (
+	"fmt"
+	"sync"
+	"time"
+)
+
+type Database struct {
+	mu sync.RWMutex
+	data map[string]string
+}
+
+func (db *Database) GetUser(name string) string {
+	db.mu.RLock()
+	defer db.mu.RUnlock()
+	fmt.Println("G1: Mam użytkownika, teraz sprawdzam uprawnienia...")
+	
+	return db.GetPermissions(name) 
+}
+
+func (db *Database) GetPermissions(name string) string {
+	db.mu.RLock() 
+	defer db.mu.RUnlock()
+	return "Admin"
+}
+
+func main() {
+	db := &Database{data: make(map[string]string)}
+
+	go func() {
+		db.GetUser("Ania")
+	}()
+
+	time.Sleep(10 * time.Millisecond)
+	go func() {
+		fmt.Println("Writer: I want to write, waiting for Lock()...")
+		db.mu.Lock()
+		fmt.Println("Writer: Write!")
+		db.mu.Unlock()
+	}()
+
+	select {}
+}
+```
