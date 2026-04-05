@@ -45,3 +45,11 @@ Code readability and structure
 Error handling
 Correctness of REST implementation
 Basic Go knowledge (structs, slices, JSON, HTTP)
+
+### Check
+
+```bash
+curl -X -v POST http://localhost:8090/tasks/ \
+     -H "Content-Type: application/json" \
+     -d '{"name": "Learn GO", "completed": false}'
+```

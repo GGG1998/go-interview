@@ -11,7 +11,7 @@ import (
 
 func renderJSON(response http.ResponseWriter, body []byte, status int) {
 	response.Header().Set("Content-Type", "application/json")
-	response.WriteHeader(http.StatusCreated)
+	response.WriteHeader(status)
 	response.Write(body)
 }
 
@@ -64,7 +64,7 @@ func (t *TaskController) CreateTasks(response http.ResponseWriter, request *http
 }
 
 func (t *TaskController) GetTask(response http.ResponseWriter, request *http.Request) {
-	id := request.URL.Query().Get("id")
+	id := request.PathValue("id")
 	if id == "" {
 		value, _ := json.Marshal(Response[struct{}]{ErrorMsg: "id param is empty"})
 		renderJSON(response, value, http.StatusBadRequest)
@@ -73,7 +73,7 @@ func (t *TaskController) GetTask(response http.ResponseWriter, request *http.Req
 
 	element, err := t.db.SelectById(id)
 	if err != nil {
-		value, _ := json.Marshal(Response[struct{}]{ErrorMsg: "id param is empty"})
+		value, _ := json.Marshal(Response[struct{}]{ErrorMsg: "Not found"})
 		renderJSON(response, value, http.StatusNotFound)
 		return
 	}
@@ -90,5 +90,5 @@ func NewTaskController(router *http.ServeMux) {
 		db: db.NewMemoryDb[Task](),
 	}
 	router.HandleFunc("POST /tasks/", t.CreateTasks)
-	router.HandleFunc("GET /tasks/:id/", t.GetTask)
+	router.HandleFunc("GET /tasks/{id}/", t.GetTask)
 }
