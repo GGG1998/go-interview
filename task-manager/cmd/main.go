@@ -15,6 +15,13 @@ func main() {
 	mux.HandleFunc("GET /health/", func(response http.ResponseWriter, request *http.Request) {
 		response.Write([]byte("PONG"))
 	})
-	http.ListenAndServe(":8090", ratelimiter.RateLimiterIpMiddleware(mux))
+
+	go func() {
+		http.ListenAndServe(":8090", ratelimiter.RateLimiterIpMiddleware(mux))
+	}()
+
+	go func() {
+		// watchdog
+	}()
 
 }
