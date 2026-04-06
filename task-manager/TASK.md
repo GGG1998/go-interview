@@ -53,3 +53,8 @@ curl -X -v POST http://localhost:8090/tasks/ \
      -H "Content-Type: application/json" \
      -d '{"name": "Learn GO", "completed": false}'
 ```
+
+### Additional task
+
+- Modify model and due time with notification
+- Add Rate Limiter
