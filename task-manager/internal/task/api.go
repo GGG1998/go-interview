@@ -82,12 +82,12 @@ func (t *TaskController) GetTask(response http.ResponseWriter, request *http.Req
 	renderJSON(response, value, http.StatusOK)
 }
 
-func NewTaskController(router *http.ServeMux) {
+func NewTaskController(router *http.ServeMux, taskDb *db.MemoryDb[Task]) {
 	if router == nil {
 		return
 	}
 	t := TaskController{
-		db: db.NewMemoryDb[Task](),
+		db: taskDb,
 	}
 	router.HandleFunc("POST /tasks/", t.CreateTasks)
 	router.HandleFunc("GET /tasks/{id}/", t.GetTask)
