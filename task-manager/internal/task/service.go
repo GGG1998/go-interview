@@ -2,12 +2,14 @@ package task
 
 import (
 	"slices"
+	"sync"
 	"time"
 
 	"example.com/task-manager/internal/db"
 )
 
 type TaskService struct {
+	mu           sync.Mutex
 	db           *db.MemoryDb[Task]
 	activeTimers map[string]*time.Timer
 }
@@ -27,5 +29,6 @@ func (ts *TaskService) FilterByTime(duration time.Duration) []Task {
 }
 
 func (ts *TaskService) Schedule(id string) {
-
+	ts.mu.Lock()
+	defer ts.mu.Unlock()
 }
