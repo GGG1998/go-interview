@@ -21,10 +21,6 @@ func main() {
 	})
 
 	go func() {
-		http.ListenAndServe(":8090", ratelimiter.RateLimiterIpMiddleware(mux))
-	}()
-
-	go func() {
 		ticker := time.NewTicker(15 * time.Second)
 		for range ticker.C {
 			// we have to load from db task list - when fire
@@ -32,5 +28,6 @@ func main() {
 			// we have to load from db notification list - when fire
 		}
 	}()
-
+	
+	http.ListenAndServe(":8090", ratelimiter.RateLimiterIpMiddleware(mux))
 }

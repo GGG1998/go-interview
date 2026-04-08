@@ -1,6 +1,9 @@
 package db
 
-import "fmt"
+import (
+	"fmt"
+	"iter"
+)
 
 type MemoryDb[T Identifiable] struct {
 	data map[string]T
@@ -22,6 +25,16 @@ func (m *MemoryDb[T]) SelectById(id string) (*T, error) {
 		return &v, nil
 	}
 	return nil, fmt.Errorf("Not Found")
+}
+
+func (m *MemoryDb[T]) FilterBy(cond func(element T) bool) iter.Seq[T] {
+	return func(yield func(T) bool) {
+		for _, v := range m.data {
+			if cond(v) && !yield(v) {
+				return
+			}
+		}
+	}
 }
 
 func NewMemoryDb[T Identifiable]() *MemoryDb[T] {
