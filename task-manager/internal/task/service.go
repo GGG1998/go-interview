@@ -28,7 +28,12 @@ func (ts *TaskService) FilterByTime(duration time.Duration) []Task {
 	return slices.Collect(iters)
 }
 
-func (ts *TaskService) Schedule(id string) {
+func (ts *TaskService) Schedule() {
 	ts.mu.Lock()
 	defer ts.mu.Unlock()
+
+	tasks := ts.FilterByTime(1 * time.Minute)
+	for _, task := range tasks {
+		ts.activeTimers[task.GetId()] = time.NewTimer(task.Duration())
+	}
 }
