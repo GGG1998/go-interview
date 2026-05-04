@@ -22,6 +22,10 @@ func NewRecord(timestamp int64, key []byte, record []byte) *Record {
 
 func (r *Record) Header() int64 { return 8 /* uint32 + uint32 */ }
 
+func (r *Record) Size() int64 {
+	return r.Header() + int64(r.keyLength) + int64(r.recordLength)
+}
+
 func (r *Record) Encode() []byte {
 	headerSize := len(r.Key) + len(r.Record)
 	buf := bytes.NewBuffer(make([]byte, 0, headerSize))

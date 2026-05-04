@@ -8,14 +8,25 @@ type Log struct {
 	active  *Segment
 }
 
-func (l *Log) next() iter.Seq2[string, int] {
+func (l *Log) next() iter.Seq2[string, int64] {
 	startSegmentIndex := 0
+	var startOffset int64
 	segment := &Segment{}
 
-	return func(yield func(K string, V int) bool) {
-		segment.open(startSegmentIndex)
-		yield("", 0)
-		segment.close()
+	return func(yield func(K string, V int64) bool) {
+		err := segment.open(startSegmentIndex)
+		defer segment.close()
+		if err != nil {
+			return
+		}
+
+		record, nextOffset, err := segment.ReadAt(startOffset)
+		if err != nil || !yield(string(record.Key), startOffset) {
+			return
+		}
+		startSegmentIndex += 1
+		startOffset = nextOffset
+
 	}
 }
 

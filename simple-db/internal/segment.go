@@ -2,7 +2,6 @@ package internal
 
 import (
 	"encoding/binary"
-	"errors"
 	"fmt"
 	"os"
 	"time"
@@ -10,6 +9,7 @@ import (
 
 type Segment struct {
 	file      *os.File
+	cursor    int
 	increment int
 }
 
@@ -32,22 +32,23 @@ func (s *Segment) append(key string, record []byte) error {
 	return nil
 }
 
-func (s *Segment) readOne() (*Record, error) {
+func (s *Segment) ReadAt(offset int64) (*Record, int64, error) {
 	record := &Record{}
-	container := make([]byte, 8)
-	_, err := s.file.ReadAt(container, 0)
+
+	container := make([]byte, record.Header())
+	_, err := s.file.ReadAt(container, offset)
 	if err != nil {
-		return nil, errors.New("xyz")
+		return nil, 0, fmt.Errorf("Can't read byte %w", err)
 	}
 
 	keyLength := binary.LittleEndian.Uint32(container[0:4])
 	dataLength := binary.LittleEndian.Uint32(container[4:8])
-	fullSize := 8 + keyLength + dataLength
+	fullSize := uint32(record.Header()) + keyLength + dataLength
 
 	recordRaw := make([]byte, fullSize)
-	_, err = s.file.ReadAt(recordRaw, 0)
+	_, err = s.file.ReadAt(recordRaw, offset)
 	record.Decode(recordRaw)
-	return record, nil
+	return record, record.Size() + offset, nil
 
 }
 
