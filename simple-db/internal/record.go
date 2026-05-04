@@ -3,7 +3,6 @@ package internal
 import (
 	"bytes"
 	"encoding/binary"
-	"fmt"
 	"io"
 )
 
@@ -42,8 +41,7 @@ func (r *Record) Decode(data []byte) (int, error) {
 		- Change NewBuffer to NewReader, learn why
 		- Set limit for record/key for security reason, learn why
 	*/
-	fmt.Println("Decode enter")
-	if len(data) < 8 {
+	if len(data) < int(r.Header()) {
 		return 0, io.ErrUnexpectedEOF
 	}
 
@@ -51,24 +49,21 @@ func (r *Record) Decode(data []byte) (int, error) {
 	if err := binary.Read(buf, binary.LittleEndian, &r.keyLength); err != nil {
 		return 0, err
 	}
-	fmt.Println("Decode bug1")
 	if err := binary.Read(buf, binary.LittleEndian, &r.recordLength); err != nil {
 		return 0, err
 	}
 
 	r.Key = make([]byte, r.keyLength)
 	r.Record = make([]byte, r.recordLength)
-	fmt.Println("Decode bug2 %d", r.recordLength)
 
 	if _, err := buf.Read(r.Key); err != nil {
 		return 0, err
 	}
-	fmt.Println("Decode almost")
+
 	if _, err := buf.Read(r.Record); err != nil {
 		return 0, err
 	}
 
 	// Return - buf.Len(), learn why
-	fmt.Println("Decode Finish")
 	return len(data), nil
 }
