@@ -3,6 +3,7 @@ package internal
 import "iter"
 
 const DEFAULT_PATH = "./"
+const DEFAULT_SIZE_LOG = 1024 * 1024 * 256
 
 type Log struct {
 	basePath string
@@ -21,7 +22,7 @@ func (l *Log) next() iter.Seq2[string, int64] {
 		segment := &Segment{}
 
 		for {
-			if err := segment.open(startSegmentIndex, l.basePath); err != nil {
+			if err := segment.Open(startSegmentIndex, l.basePath); err != nil {
 				return
 			}
 			l.active = segment
@@ -31,14 +32,14 @@ func (l *Log) next() iter.Seq2[string, int64] {
 					break
 				}
 				if !yield(string(record.Key), startOffset) {
-					segment.close()
+					segment.Close()
 					return
 				}
 				startOffset = nextOffset
 			}
 			startSegmentIndex += 1
 			startOffset = 0
-			segment.close()
+			segment.Close()
 		}
 	}
 }
@@ -50,9 +51,15 @@ func (l *Log) buildIndex() {
 	}
 }
 
-func (l *Log) Open(basePath string) {
-	if basePath == "" {
-		basePath = DEFAULT_PATH
-	}
+func (l *Log) Open() {
 	l.buildIndex()
+	if l.active == nil {
+		l.active = NewSegment(0, l.basePath)
+	}
+}
+
+func (l *Log) Close() {
+	if l.active != nil {
+		l.active.Close()
+	}
 }

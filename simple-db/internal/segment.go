@@ -16,9 +16,19 @@ type Segment struct {
 	increment int
 }
 
-func (s *Segment) open(index int, basePath string) error {
+func NewSegment(index int, basePath string) *Segment {
+	segment := Segment{}
+	segment.open(index, basePath, os.O_APPEND|os.O_RDWR|os.O_CREATE)
+	return &segment
+}
+
+func (s *Segment) Open(index int, basePath string) error {
+	return s.open(index, basePath, os.O_APPEND|os.O_RDWR)
+}
+
+func (s *Segment) open(index int, basePath string, behaviour int) error {
 	segment_path := path.Join(basePath, fmt.Sprintf(SEGMENT_NAME, s.increment))
-	file, err := os.OpenFile(segment_path, os.O_APPEND|os.O_RDWR, 0644)
+	file, err := os.OpenFile(segment_path, behaviour, 0644)
 	if err != nil {
 		return err
 	}
@@ -56,7 +66,7 @@ func (s *Segment) ReadAt(offset int64) (*Record, int64, error) {
 
 }
 
-func (s *Segment) close() error {
+func (s *Segment) Close() error {
 	if s.file != nil {
 		return nil
 	}
