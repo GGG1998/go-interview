@@ -58,6 +58,24 @@ func (l *Log) Open() {
 	}
 }
 
+func (l *Log) Append(key string, record []byte) error {
+	/*
+		1. Check > maxSize
+		2. Update global index
+		3. Append duplicated key, we don't check wheter it exist in log, or no
+		4.
+	*/
+	return nil
+}
+
+func (l *Log) Get(key string) []byte {
+	return nil
+}
+
+func (l *Log) Delete(key string) error {
+	return nil
+}
+
 func (l *Log) Close() {
 	if l.active != nil {
 		l.active.Close()
