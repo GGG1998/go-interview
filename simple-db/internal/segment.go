@@ -4,8 +4,11 @@ import (
 	"encoding/binary"
 	"fmt"
 	"os"
+	"path"
 	"time"
 )
+
+const SEGMENT_NAME = "segment-%d.bin"
 
 type Segment struct {
 	file      *os.File
@@ -13,8 +16,9 @@ type Segment struct {
 	increment int
 }
 
-func (s *Segment) open(index int) error {
-	file, err := os.OpenFile(fmt.Sprintf("segment-%d.bin", s.increment), os.O_APPEND|os.O_RDWR, 0644)
+func (s *Segment) open(index int, basePath string) error {
+	segment_path := path.Join(basePath, fmt.Sprintf(SEGMENT_NAME, s.increment))
+	file, err := os.OpenFile(segment_path, os.O_APPEND|os.O_RDWR, 0644)
 	if err != nil {
 		return err
 	}

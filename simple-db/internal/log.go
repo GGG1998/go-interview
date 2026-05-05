@@ -2,10 +2,13 @@ package internal
 
 import "iter"
 
+const DEFAULT_PATH = "./"
+
 type Log struct {
-	maxSize int64
-	index   map[string]int64
-	active  *Segment
+	basePath string
+	maxSize  int64
+	index    map[string]int64
+	active   *Segment
 }
 
 func (l *Log) next() iter.Seq2[string, int64] {
@@ -17,7 +20,7 @@ func (l *Log) next() iter.Seq2[string, int64] {
 		segment := &Segment{}
 
 		for {
-			if err := segment.open(startSegmentIndex); err != nil {
+			if err := segment.open(startSegmentIndex, l.basePath); err != nil {
 				return
 			}
 			for {
@@ -39,11 +42,15 @@ func (l *Log) next() iter.Seq2[string, int64] {
 }
 
 func (l *Log) buildIndex() {
+	l.index = make(map[string]int64)
 	for k, v := range l.next() {
 		l.index[k] = v
 	}
 }
 
-func (l *Log) Open(path string) {
-
+func (l *Log) Open(basePath string) {
+	if basePath == "" {
+		basePath = DEFAULT_PATH
+	}
+	l.buildIndex()
 }
