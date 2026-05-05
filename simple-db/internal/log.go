@@ -59,12 +59,16 @@ func (l *Log) Open() {
 }
 
 func (l *Log) Append(key string, record []byte) error {
-	/*
-		1. Check > maxSize
-		2. Update global index
-		3. Append duplicated key, we don't check wheter it exist in log, or no
-		4.
-	*/
+	if l.active.Size()+int64(len(record)) > l.maxSize {
+		l.active = NewSegment(l.active.nextIndex(), l.basePath)
+	}
+
+	offset, err := l.active.append(key, record)
+	if err != nil {
+		return err
+	}
+	l.index[key] = offset
+
 	return nil
 }
 
