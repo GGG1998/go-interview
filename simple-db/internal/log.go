@@ -12,6 +12,7 @@ type Log struct {
 }
 
 func (l *Log) next() iter.Seq2[string, int64] {
+	// It's require error management
 	return func(yield func(K string, V int64) bool) {
 		// We don't know how many files exist
 		// We know that loop will be break by an error
@@ -23,6 +24,7 @@ func (l *Log) next() iter.Seq2[string, int64] {
 			if err := segment.open(startSegmentIndex, l.basePath); err != nil {
 				return
 			}
+			l.active = segment
 			for {
 				record, nextOffset, err := segment.ReadAt(startOffset)
 				if err != nil {
