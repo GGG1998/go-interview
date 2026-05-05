@@ -51,6 +51,7 @@ func (s *Segment) append(key string, record []byte) (int64, error) {
 	if err != nil {
 		return 0, err
 	}
+	s.cursor = s.Size()
 	return tailOffset, nil
 }
 
