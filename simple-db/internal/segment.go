@@ -53,5 +53,8 @@ func (s *Segment) ReadAt(offset int64) (*Record, int64, error) {
 }
 
 func (s *Segment) close() error {
+	if s.file != nil {
+		return nil
+	}
 	return s.file.Close()
 }
